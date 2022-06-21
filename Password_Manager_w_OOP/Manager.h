@@ -1,7 +1,7 @@
 #pragma once
 class Manager
 {
-public:
+public:aaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 };
 
