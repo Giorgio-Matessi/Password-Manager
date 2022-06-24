@@ -21,9 +21,40 @@ string GetDocumentsPath()
 
 StoredData::StoredData()
 {
+	allUsersFilePath = GetDocumentsPath() + "\\Password_Manager\\users.txt";
 }
 
-int StoredData::GetSiteIndex(string siteName)
+bool StoredData::FirstTimeOpen()
+{
+	string path = GetDocumentsPath() + "\\Password_Manager";
+
+	if (!fs::exists(path))
+	{
+		//Create Folders
+		fs::create_directory(path);
+		fs::create_directory(path + "\\Users");
+		ofstream fout;
+		
+		//Create users file
+		fout.open(path + "\\users.txt");
+		fout << endl;
+		fout.close();
+
+	}
+	//Checks if Application has all folders
+	if (fs::exists(path) && fs::exists(path + "\\Users"))
+	{
+		cout << "Application Successfully Loaded." << endl;
+		return true;
+	}
+	else
+	{
+		cout << "Application Loaded Incorrectly." << endl;
+		return false;
+	}
+}
+
+int StoredData::SearchSite(string siteName)
 {
 	return 0;
 }
@@ -48,8 +79,9 @@ bool StoredData::CreateNewUser(string newUsername)
 	string documentsPath = GetDocumentsPath();
 
 	string tempPath; //Path to User Folder
-	tempPath = documentsPath + "\\" + "Password_Manager" + "\\" + "Users" + newUsername;
+	tempPath = documentsPath + "\\Password_Manager\\Users\\" + newUsername;
 
+	//Creates Directory
 	if (fs::create_directory(tempPath) != true){
 		return false;
 	}
