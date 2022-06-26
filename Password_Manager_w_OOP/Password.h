@@ -8,12 +8,14 @@
  */
 
 #include <iostream>
+#include "User.h"
+#include "StoredData.h"
 
 using namespace std;
 
 #ifndef PASSWORD_H
 #define PASSWORD_H
-class Password
+class Password 
 {
 public:
 	Password(); //Default constuctor for password object
@@ -21,9 +23,9 @@ public:
 	static string EncryptPassword(string password); //Encrypts password before file storage *** Returns encrypted string 
 	static string DecryptPassword(string password); //Decrypts password when reading from file *** Returns decrypted string
 
-	static bool ChangeAccountPassword(string newAccountPassword); //Changes account password and stores *** Returns true if successful 
+	static bool CheckPassword(User user, string enteredPassword); //Checks if user password is same as entered password
 
-	static string GenerateRandomPassowrd(int passwordLength); //Creates random password of given length *** Returns generated password
+	static bool ChangeAccountPassword(User user, string newAccountPassword); //Changes account password and stores *** Returns true if successful 
 };
 
 #endif

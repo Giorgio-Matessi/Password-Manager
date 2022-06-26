@@ -1,5 +1,11 @@
 #include "Password.h"
+#include "User.h"
+#include "StoredData.h"
+#include <windows.h>
 #include <iostream>
+#include <shlobj.h>
+#include <filesystem>
+#include <fstream>
 
 using namespace std;
 
@@ -29,13 +35,46 @@ string Password::DecryptPassword(string password)
 	return password;
 }
 
-bool Password::ChangeAccountPassword(string newAccountPassword)
+bool Password::CheckPassword(User user, string enteredPassword)
 {
+	ifstream fin;
+	fin.open(user.GetUserInfoDir());
 
-	return false;
+	if (fin.is_open())
+	{
+		string userPassword;
+		getline(fin, userPassword);
+
+		if (DecryptPassword(userPassword) == enteredPassword)
+		{
+			fin.close();
+			return true;
+		}
+		else
+		{
+			fin.close();
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
-string Password::GenerateRandomPassowrd(int passwordLength)
+bool Password::ChangeAccountPassword(User user, string newAccountPassword)
 {
-	return string();
+	fstream file;
+	file.open(user.GetUserInfoDir());
+
+	if (file.is_open())
+	{
+		file << EncryptPassword(newAccountPassword);
+		file.close();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

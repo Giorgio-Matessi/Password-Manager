@@ -8,9 +8,6 @@
  */
 
 #include <iostream>
-#include <vector>
-#include <filesystem>
-namespace fs = std::filesystem;
 
 #ifndef USER_H
 #define USER_H
@@ -29,7 +26,7 @@ public:
 private:
 
 	string username; //Defined once logged in/account made
-	string userInfoDir; //Directory Address of User-System-Password/Stored Passwords ***** Initialized in User Constructor 
+	string userInfoDir; //Path of User-System-Password/Stored Passwords ***** Initialized in User Constructor 
 
 };
 
