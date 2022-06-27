@@ -16,4 +16,4 @@ A simple/lightweight password manager that can create, store, and change secure 
 
 ## Installation
 
-Simply download the executable (Password Mangager.exe) file
+Windows x64: Simply download the executable (Password Mangager.exe) file
