@@ -43,17 +43,18 @@ int main(int argc, char* argv[])
 	{
 		case 1:
 		{
-			cout << "Please Enter Username: ";
+			cout << "\nPlease Enter Username: ";
 			cin >> enteredUsername;
 			while (!StoredData.CheckUserExists(enteredUsername))
 			{
+				
 				//Create a New Account Option:
 				char charChoice;
-				cout << "Could Not Find User. Would You Like To Create An Account? [y/n]: ";
+				cout << "\nCould Not Find User. Would You Like To Create An Account? [y/n]: ";
 				cin >> charChoice;
 				if (charChoice == 'y' || charChoice == 'Y')
 				{
-					cout << "Please Enter a New Username: ";
+					cout << "\nPlease Enter a New Username: ";
 					cin >> enteredUsername;
 
 					string enterAccountPassword;
@@ -70,7 +71,7 @@ int main(int argc, char* argv[])
 					}
 					break;
 				}
-
+				cout << "\nPlease Enter Username: ";
 				cin >> enteredUsername;
 			}
 
@@ -92,7 +93,7 @@ int main(int argc, char* argv[])
 		case 2:
 		{
 			
-			cout << "Please Enter a New Username: ";
+			cout << "\nPlease Enter a New Username: ";
 			cin >> enteredUsername;
 
 			string enterAccountPassword;
@@ -137,9 +138,8 @@ int main(int argc, char* argv[])
 				{
 					case 1:
 					{
-						cout << mainBanner;
 						string siteName = "";
-						cout << "Please Enter Site Name: ";
+						cout << "\nPlease Enter Site Name: ";
 						cin >> siteName;
 
 						cout << "Please Enter Password Length: ";
@@ -152,9 +152,8 @@ int main(int argc, char* argv[])
 
 					case 2:
 					{
-						cout << mainBanner ;
 						string siteName = "";
-						cout << "Please Enter Site Name: ";
+						cout << "\nPlease Enter Site Name: ";
 						cin >> siteName;
 
 						string enteredPassword;
@@ -171,10 +170,9 @@ int main(int argc, char* argv[])
 
 			case 2:
 			{
-				cout << mainBanner;
 
 				string enteredSite;
-				cout << "Please Enter Site Name: ";
+				cout << "\nPlease Enter Site Name: ";
 				cin >> enteredSite;
 
 				StoredData.GetSitePassword(enteredSite);
@@ -185,7 +183,7 @@ int main(int argc, char* argv[])
 			case 3:
 			{
 				string enteredSite;
-				cout << "Please Enter Site Name: ";
+				cout << "\nPlease Enter Site Name: ";
 				cin >> enteredSite;
 
 				string newPassword;
@@ -207,10 +205,11 @@ int main(int argc, char* argv[])
 					case 1:
 					{
 						string enteredPassword;
-						cout << "Please Enter A New System Password: ";
+						cout << "\nPlease Enter A New System Password: ";
 						cin >> enteredPassword;
 
 						StoredData.SaveUserData(loggedInUser, 1, enteredPassword);
+						break;
 					}
 
 					case 2:
@@ -225,6 +224,7 @@ int main(int argc, char* argv[])
 					}
 
 				}
+				break;
 			}
 
 			case 5:

@@ -47,16 +47,28 @@ bool StoredData::FirstTimeOpen()
 
 	}
 	//Checks if Application has all folders
-	if (std::filesystem::exists(path) && std::filesystem::exists(path + "\\Users"))
+	if (std::filesystem::exists(path) && std::filesystem::exists(path + "\\Users") && std::filesystem::exists(path + "\\users.txt"))
 	{
 		cout << "Application Successfully Loaded." << endl;
 		return true;
 	}
 	else
 	{
-		cout << "Application Loaded Incorrectly." << endl;
-		return false;
+		cout << "Program Did Not Fully Load. Repairing..." << endl;
+		if (!std::filesystem::exists(path + "\\Users"))
+		{
+			std::filesystem::create_directory(path + "\\Users");	
+		}
+		if (!std::filesystem::exists(path + "\\users.txt"))
+		{
+			ofstream fout;
+			fout.open(path + "\\users.txt");
+			fout << endl;
+			fout.close();
+		}
+		cout << "Repaired." << endl;
 	}
+	return true;
 }
 
 void StoredData::GetSitePassword(string siteName)
@@ -304,7 +316,9 @@ int StoredData::SaveUserData(User user , int flag = 0, string newAccountPassword
 
 void StoredData::BackupUserData(User user)
 {
-	cout << "Creating Backup File." << endl;
+	SaveUserData(user);
+	
+	cout << "\nCreating Backup File...." << endl;
 	//Store system password before rewriting file
 	ifstream fin;
 	fin.open(user.GetUserInfoPath());
@@ -313,8 +327,10 @@ void StoredData::BackupUserData(User user)
 	fin.close();
 
 	ofstream fout;
-	string path = GetDocumentsPath() + "\\Password_Manager\\Users" + user.GetUsername() + "Backup_File.txt";
+	string path = GetDocumentsPath() + "\\Password_Manager\\Users\\" + user.GetUsername() + "\\Backup_File.txt";
 	fout.open(path);
+
+	
 
 	fout << tempSysPass << endl; //write system password at the top of the file
 
@@ -327,6 +343,7 @@ void StoredData::BackupUserData(User user)
 	cout << "Backup File Created In: " << user.GetUserFolderPath() << endl;
 	return;
 }
+
 
 
 //Private Member Functions:
