@@ -15,23 +15,29 @@
 #include <filesystem>
 #include <fstream>
 
-namespace fs = std::filesystem;
-using namespace std;
+using std::cout;
+using std::string;
+using std::ofstream;
+using std::ifstream;
+using std::vector;
+using std::wstring;
+using std::endl;
 
 StoredData::StoredData()
 {
 	allUsersFilePath = GetDocumentsPath() + "\\Password_Manager\\users.txt";
+	passwordsStored = 0;
 }
 
 bool StoredData::FirstTimeOpen()
 {
 	string path = GetDocumentsPath() + "\\Password_Manager";
 
-	if (!fs::exists(path))
+	if (!std::filesystem::exists(path))
 	{
 		//Create Folders
-		fs::create_directory(path);
-		fs::create_directory(path + "\\Users");
+		std::filesystem::create_directory(path);
+		std::filesystem::create_directory(path + "\\Users");
 		ofstream fout;
 		
 		//Create users file
@@ -41,7 +47,7 @@ bool StoredData::FirstTimeOpen()
 
 	}
 	//Checks if Application has all folders
-	if (fs::exists(path) && fs::exists(path + "\\Users"))
+	if (std::filesystem::exists(path) && std::filesystem::exists(path + "\\Users"))
 	{
 		cout << "Application Successfully Loaded." << endl;
 		return true;
@@ -53,32 +59,26 @@ bool StoredData::FirstTimeOpen()
 	}
 }
 
-string StoredData::GetSiteName(string siteName)
+void StoredData::GetSitePassword(string siteName)
 {
 	int index = SearchForSite(siteName);
 
 	if (index != -1)
 	{
-		return siteNames[index];
+		cout << "Site Name: " << siteNames[index] << endl;
+		cout << "Site Password: " << passwords[index] << endl;
+		return;
 	}
 	else
 	{
-		return " ";
+		cout << "Could Not Find Site." << endl;
+		return;
 	}
 }
 
-string StoredData::GetSitePassword(string siteName)
+int StoredData::GetNumPasswordsStored()
 {
-	int index = SearchForSite(siteName);
-
-	if (index != -1)
-	{
-		return passwords[index];
-	}
-	else
-	{
-		return " ";
-	}
+	return passwordsStored;
 }
 
 bool StoredData::ChangeSpecificPassword(string siteName, string newPassword)
@@ -88,10 +88,12 @@ bool StoredData::ChangeSpecificPassword(string siteName, string newPassword)
 	if (index != -1)
 	{
 		passwords[index] = newPassword;
+		cout << "Password Was Changed." << endl;
 		return true;
 	}
 	else
 	{
+		cout << "Site Could Not Be Found. Password Was Not Changed." << endl;
 		return false;
 	}
 }
@@ -114,29 +116,35 @@ bool StoredData::CheckUserExists(string username)
 	return false;
 }
 
-bool StoredData::CreateNewUser(string newUsername)
+bool StoredData::CreateNewUser(string newUsername, string accountPassword)
 {
+	if (CheckUserExists(newUsername))
+	{
+		cout << "\nUser Already Exists." << endl;
+		return false;
+	}
 
 	string tempPath; //Path to User Folder
 	tempPath = GetDocumentsPath() + "\\Password_Manager\\Users\\" + newUsername;
 
 	//Creates User Folder 
-	if (fs::create_directory(tempPath) != true){
+	if (std::filesystem::create_directory(tempPath) != true){
 		return false;
 	}
 
-	//Create Info.txt file in User Folder
+	//Create Info.txt file in User Folder and Store Account Password
 	User User(newUsername);
 	ofstream fout;
-	fout.open(User.GetUserInfoDir());
-	fout << endl;
+	fout.open(GetDocumentsPath() + "\\Password_Manager\\Users\\" + newUsername + "\\Info.txt");
+	fout << Password::EncryptPassword(accountPassword) << endl;
 	fout.close();
 
 	//Add users name to the end of users.txt file
-	fout.open(allUsersFilePath, ios::app);
+	fout.open(allUsersFilePath, std::ios::app);
 	fout << newUsername << endl;
 	fout.close();
 
+	cout << "Account Created." << endl;
 	return true;
 }
 
@@ -148,10 +156,15 @@ bool StoredData::StoreNewPassword(string siteName, string password)
 	{
 		siteNames.push_back(siteName);
 		passwords.push_back(password);
+		passwordsStored++;
+		cout << "Site Name: " << siteName << endl;
+		cout << "Site Password: " << password << endl;
+		cout << "Password Stored." << endl;
 		return true;
 	}
 	else
 	{
+		cout << "Site Already Exists. Did Not Store." << endl;
 		return false;
 	}
 }
@@ -162,7 +175,7 @@ bool StoredData::GenerateAndStoreRandomPassword(string siteName, int passwordLen
 
 	char lowerCase[] = { 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 	char upperCase[] = { 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z' };
-	char special[] = { '!', '”', '#', '$', '%', '&', '’', '(',  ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '~', '{', '|', '}' };
+	char special[] = { '!', '”', '#', '$', '%', '&', '’', '(',  ')', '*', '+', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '~', '{', '|', '}' };
 
 	srand(time(NULL));
 	string newPassword = "";
@@ -177,20 +190,20 @@ bool StoredData::GenerateAndStoreRandomPassword(string siteName, int passwordLen
 		//lowerCase
 		if (rRan < 100)
 		{
-			rLowerUpper = rand() % 25 + 1;
+			rLowerUpper = rand() % sizeof(lowerCase);
 
 			newPassword = newPassword + lowerCase[rLowerUpper];
 		}
 		//upperCase
 		else if (rRan >= 100 && rRan < 200)
 		{
-			rLowerUpper = rand() % 25 + 1;
+			rLowerUpper = rand() % sizeof(upperCase);;
 			newPassword = newPassword + upperCase[rLowerUpper];
 		}
 		//special
 		else if (rRan >= 200 && rRan < 300)
 		{
-			rSpecial = rand() % 31;
+			rSpecial = rand() % 25;
 			newPassword = newPassword + special[rSpecial];
 		}
 	}
@@ -198,12 +211,13 @@ bool StoredData::GenerateAndStoreRandomPassword(string siteName, int passwordLen
 	return StoreNewPassword(siteName, newPassword);
 }
 
-int StoredData::LoadUserData(User user)
+void StoredData::LoadUserData(User user)
 {
+	cout << "\nLoading User Data...." << endl;
 	string tempString = "";
 	string arr[2];
 	ifstream fin;
-	fin.open(user.GetUserInfoDir());
+	fin.open(user.GetUserInfoPath());
 	int passwordCount = 0;
 
 	if (fin.is_open())
@@ -216,7 +230,7 @@ int StoredData::LoadUserData(User user)
 			getline(fin, tempString);
 			if (tempString != "")
 			{
-				split(tempString, ',', arr, 2);
+				Split(tempString, ',', arr, 2);
 				siteNames.push_back(arr[0]);
 				passwords.push_back(Password::DecryptPassword(arr[1]));
 				passwordCount++;
@@ -225,41 +239,75 @@ int StoredData::LoadUserData(User user)
 		}
 	}
 	fin.close();
-	return passwordCount;
+
+	passwordsStored = passwordCount;
+
+	cout << "Successfully Loaded." << endl;
+	return;
 }
 
-int StoredData::SaveUserData(User user)
+int StoredData::SaveUserData(User user , int flag = 0, string newAccountPassword= "")
 {
-	//Store system password before rewriting file
-	ifstream fin;
-	fin.open(user.GetUserInfoDir());
-	string tempSysPass;
-	getline(fin,tempSysPass);
-	fin.close();
-	
-	//Write system password and all other passwords and site names to file
-	int passwordCount=0; //Counts how many passwords were stored
-	
-	ofstream fout; 
-	fout.open(user.GetUserInfoDir());
-	fout << tempSysPass << endl; //write system password at the top of the file
-
-	//Run through vectors while storing their values
-	for (int i = 0; i < siteNames.size(); i++)
+	if (flag == 0)
 	{
-		fout << siteNames[i] << "," << Password::EncryptPassword(passwords[i]) << endl;
-		passwordCount++;
-	}
-	fout.close();
+		cout << "\nSaving User Data...." << endl;
+		//Store system password before rewriting file
+		ifstream fin;
+		fin.open(user.GetUserInfoPath());
+		string tempSysPass;
+		getline(fin,tempSysPass);
+		fin.close();
+	
+		//Write system password and all other passwords and site names to file
+		int passwordCount=0; //Counts how many passwords were stored
+	
+		ofstream fout;
+		fout.open(user.GetUserInfoPath());
+		fout << tempSysPass << endl; //write system password at the top of the file
 
-	return passwordCount;
+		//Run through vectors while storing their values
+		for (int i = 0; i < siteNames.size(); i++)
+		{
+			fout << siteNames[i] << "," << Password::EncryptPassword(passwords[i]) << endl;
+			passwordCount++;
+		}
+		fout.close();
+
+		cout << "User Data Saved." << endl;
+		return passwordCount;
+	}
+	else
+	{
+		cout << "\nSaving User Data...." << endl;
+		string tempSysPass = newAccountPassword;
+		
+		//Write system password and all other passwords and site names to file
+		int passwordCount = 0; //Counts how many passwords were stored
+
+		ofstream fout;
+		fout.open(user.GetUserInfoPath());
+		fout << Password::EncryptPassword(tempSysPass) << endl; //write system password at the top of the file
+
+		//Run through vectors while storing their values
+		for (int i = 0; i < siteNames.size(); i++)
+		{
+			fout << siteNames[i] << "," << Password::EncryptPassword(passwords[i]) << endl;
+			passwordCount++;
+		}
+		fout.close();
+
+		cout << "User Data Saved." << endl;
+		return passwordCount;
+	}
+
 }
 
 void StoredData::BackupUserData(User user)
 {
+	cout << "Creating Backup File." << endl;
 	//Store system password before rewriting file
 	ifstream fin;
-	fin.open(user.GetUserInfoDir());
+	fin.open(user.GetUserInfoPath());
 	string tempSysPass;
 	getline(fin, tempSysPass);
 	fin.close();
@@ -276,12 +324,13 @@ void StoredData::BackupUserData(User user)
 		fout << siteNames[i] << "," << Password::EncryptPassword(passwords[i]) << endl;
 	}
 
+	cout << "Backup File Created In: " << user.GetUserFolderPath() << endl;
 	return;
 }
 
 
 //Private Member Functions:
-string StoredData::toLow(string inputString, int stringLength)
+string StoredData::ToLow(string inputString, int stringLength)
 {
 	for (int i = 0; i < stringLength; i++)
 	{
@@ -291,7 +340,7 @@ string StoredData::toLow(string inputString, int stringLength)
 	return inputString;
 }
  									     
-int StoredData::split(string inputString, char separator, string arr[], int size) {
+int StoredData::Split(string inputString, char separator, string arr[], int size) {
 	//check for length 0 array
 	if (inputString.length() == 0) {
 		return 0;
@@ -326,7 +375,7 @@ int StoredData::SearchForSite(string siteName)
 {
 	for (int i = 0; i < siteNames.size(); i++)
 	{
-		if (toLow(siteName, siteName.length()) == toLow(siteNames[i], siteNames[i].length()))
+		if (ToLow(siteName, siteName.length()) == ToLow(siteNames[i], siteNames[i].length()))
 		{
 			return i;
 		}
@@ -337,13 +386,19 @@ int StoredData::SearchForSite(string siteName)
 
 string StoredData::GetDocumentsPath()
 {
+
 	//Get Documents Path on current computer using Windows API Function
-	char pathChar[MAX_PATH];
-	HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, pathChar);
-	string documentsPath(pathChar);
-	if (result != S_OK) {
-		cout << "Error: " << result << endl;
+	PWSTR ppszPath;    // variable to receive the path memory block pointer.
+
+	HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &ppszPath);
+
+	std::wstring myPath;
+	if (SUCCEEDED(hr)) {
+		myPath = ppszPath;      // make a local copy of the path
 	}
 
-	return documentsPath;
+	string path = std::filesystem::path(myPath).string();
+
+	return path;
 }
+

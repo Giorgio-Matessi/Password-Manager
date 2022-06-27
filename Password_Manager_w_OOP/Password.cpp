@@ -7,7 +7,14 @@
 #include <filesystem>
 #include <fstream>
 
-using namespace std;
+using std::cout;
+using std::string;
+using std::ofstream;
+using std::ifstream;
+using std::fstream;
+using std::vector;
+using std::wstring;
+using std::endl;
 
 Password::Password()
 {
@@ -38,7 +45,7 @@ string Password::DecryptPassword(string password)
 bool Password::CheckPassword(User user, string enteredPassword)
 {
 	ifstream fin;
-	fin.open(user.GetUserInfoDir());
+	fin.open(user.GetUserInfoPath());
 
 	if (fin.is_open())
 	{
@@ -65,16 +72,18 @@ bool Password::CheckPassword(User user, string enteredPassword)
 bool Password::ChangeAccountPassword(User user, string newAccountPassword)
 {
 	fstream file;
-	file.open(user.GetUserInfoDir());
+	file.open(user.GetUserInfoPath());
 
 	if (file.is_open())
 	{
 		file << EncryptPassword(newAccountPassword);
 		file.close();
+		cout << "Password Changed." << endl;
 		return true;
 	}
 	else
 	{
+		cout << "User Info File Could Not Be Opened. Password Not Changed." << endl;
 		return false;
 	}
 }

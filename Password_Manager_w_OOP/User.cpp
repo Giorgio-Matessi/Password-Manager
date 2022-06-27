@@ -9,30 +9,44 @@
 #include <windows.h>
 #include <iostream>
 #include <shlobj.h>
+#include <filesystem>
 #include <fstream>
+#include <iostream>
+#include "Knownfolders.h"
+
+using std::cout;
+using std::string;
+using std::ofstream;
+using std::ifstream;
+using std::wstring;
+using std::endl;
 
 
 //Get Documents Path on current computer using Windows API Function
 string GetDocumentsPath()
 {
 	//Get Documents Path on current computer using Windows API Function
-	char pathChar[MAX_PATH];
-	HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, pathChar);
+	PWSTR ppszPath;    // variable to receive the path memory block pointer.
 
-	string documentsPath(pathChar);
+	HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &ppszPath);
 
-	if (result != S_OK) {
-		cout << "Error: " << result << endl;
+	wstring myPath;
+	if (SUCCEEDED(hr)) {
+		myPath = ppszPath;      // make a local copy of the path
 	}
 
-	return documentsPath;
+	string path = std::filesystem::path(myPath).string();
+
+	return path;
 }
 
 User::User(string inputUserName)
 {
 	username = inputUserName;
 
-	userInfoDir = GetDocumentsPath() + "\\" + "Password_Manager" + "\\" + "Users" + username + "\\" + "Info.txt"; //Stored in Documents Folder 
+	userInfoPath = GetDocumentsPath() + "\\Password_Manager\\Users\\" + inputUserName + "\\Info.txt"; 
+
+	userFolderPath = GetDocumentsPath() + "\\Password_Manager\\Users\\" + inputUserName; 
 }
 
 string User::GetUsername()
@@ -40,9 +54,16 @@ string User::GetUsername()
 	return username;
 }
 
-string User::GetUserInfoDir()
+string User::GetUserInfoPath()
 {
-	return userInfoDir;
+	return userInfoPath;
 }
+
+string User::GetUserFolderPath()
+{
+	return userFolderPath;
+}
+
+
 
 

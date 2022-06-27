@@ -12,7 +12,12 @@
 #ifndef USER_H
 #define USER_H
 
-using namespace std;
+using std::cout;
+using std::string;
+using std::ofstream;
+using std::ifstream;
+using std::wstring;
+using std::endl;
 
 class User
 {
@@ -21,12 +26,14 @@ public:
 
 	//Getters for User:
 	string GetUsername();
-	string GetUserInfoDir(); 
+	string GetUserInfoPath();
+	string GetUserFolderPath();
 
 private:
 
 	string username; //Defined once logged in/account made
-	string userInfoDir; //Path of User-System-Password/Stored Passwords ***** Initialized in User Constructor 
+	string userInfoPath; //Path of User-System-Password/Stored Passwords ***** Initialized in User Constructor 
+	string userFolderPath; //Path of User Folder ***** Initialized in User Constructor
 
 };
 

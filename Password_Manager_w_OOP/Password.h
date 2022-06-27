@@ -11,7 +11,13 @@
 #include "User.h"
 #include "StoredData.h"
 
-using namespace std;
+using std::cout;
+using std::string;
+using std::ofstream;
+using std::ifstream;
+using std::vector;
+using std::wstring;
+using std::endl;
 
 #ifndef PASSWORD_H
 #define PASSWORD_H
