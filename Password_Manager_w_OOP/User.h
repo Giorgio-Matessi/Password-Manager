@@ -28,6 +28,7 @@ public:
 	string GetUsername();
 	string GetUserInfoPath();
 	string GetUserFolderPath();
+	
 
 private:
 
